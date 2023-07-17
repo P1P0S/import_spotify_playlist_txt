@@ -1,19 +1,8 @@
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from dotenv import load_dotenv
-from os import getenv
 import difflib
-
-load_dotenv()
-
-auth_manager = SpotifyOAuth(
-    client_id=getenv('CLIENT_ID'),
-    client_secret=getenv('CLIENT_SECRET'),
-    redirect_uri='http://localhost:8888/callback',
-    scope='playlist-modify-public'
-)
-
-spotify = spotipy.Spotify(auth_manager=auth_manager)
+from os import getenv
+from spotify_utils import create_spotify_instance, \
+    search_tracks, \
+    playlist_add_tracks
 
 
 def similar(a, b):
@@ -24,14 +13,18 @@ def similar(a, b):
 with open('songs.txt', 'r') as f:
     songs = f.read().splitlines()
 
+spotify = create_spotify_instance()
+
 song_ids = []
 
 for song in songs:
-    result = spotify.search(q=song, limit=5)
-    if result['tracks']['total'] > 0:
+    tracks = search_tracks(spotify, song, limit=5)
+
+    if tracks:
         best_match = None
         best_match_score = 0
-        for idx, track in enumerate(result['tracks']['items']):
+
+        for track in tracks:
             similarity_score, track_name = similar(
                 song.lower(), track['name'].lower())
             if similarity_score > best_match_score:
@@ -46,6 +39,6 @@ for song in songs:
     else:
         print(f"The music '{song}' was not found.")
 
-spotify.playlist_add_items(
-    playlist_id=getenv('YOUR_PLAYLIST_ID'),
-    items=song_ids)
+if song_ids:
+    playlist_id = getenv('YOUR_PLAYLIST_ID')
+    playlist_add_tracks(spotify, playlist_id, song_ids)
