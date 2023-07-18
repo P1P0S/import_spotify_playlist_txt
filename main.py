@@ -36,14 +36,12 @@ for song in songs:
                 best_match_score = similarity_score
 
         if best_match:
-            print(f"Song: {song}")
-            print(f"\033[32mAccuracy: {best_match['name']}\033[0m"
-                  f" - \033[31m{best_match_score * 100:.2f}%\033[0m")
+            print(f"\033[32mSong:\033[0m {best_match['name']} "
+                  f"\033[32m[precision - "
+                  f"{best_match_score * 100:.0f}%]\033[0m")
             song_ids.append(best_match['id'])
         else:
-            print(f"\033[31mThe music '{song}' was not found.\033[0m")
-    else:
-        print(f"\033[31mThe music '{song}' was not found.\033[0m")
+            print(f"\033[31mSong:\033[0m {song} \033[31m[not found]")
 
 if song_ids:
     playlist_id = getenv('YOUR_PLAYLIST_ID')
