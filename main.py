@@ -17,6 +17,9 @@ spotify = create_spotify_instance()
 
 song_ids = []
 
+# TODO: Fix magic number
+min_precision = 0.4
+
 for song in songs:
     tracks = search_tracks(spotify, song, limit=5)
 
@@ -27,17 +30,20 @@ for song in songs:
         for track in tracks:
             similarity_score, track_name = similar(
                 song.lower(), track['name'].lower())
-            if similarity_score > best_match_score:
+            if similarity_score > best_match_score and \
+                    similarity_score >= min_precision:
                 best_match = track
                 best_match_score = similarity_score
 
         if best_match:
-            print(f"{best_match['name']} - {best_match_score * 100:.2f}%")
+            print(f"Song: {song}")
+            print(f"\033[32mAccuracy: {best_match['name']}\033[0m"
+                  f" - \033[31m{best_match_score * 100:.2f}%\033[0m")
             song_ids.append(best_match['id'])
         else:
-            print(f"The music '{song}' was not found.")
+            print(f"\033[31mThe music '{song}' was not found.\033[0m")
     else:
-        print(f"The music '{song}' was not found.")
+        print(f"\033[31mThe music '{song}' was not found.\033[0m")
 
 if song_ids:
     playlist_id = getenv('YOUR_PLAYLIST_ID')
